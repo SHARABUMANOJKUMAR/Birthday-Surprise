@@ -1100,6 +1100,48 @@ function autoFire(){
   });
 }
 
+// Global audio unlocker for strict mobile browsers (iOS Safari, Android Chrome)
+let audioUnlocked = false;
+function unlockAudioContext() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  
+  if (bgMusic && bgMusic.paused) {
+    bgMusic.muted = false;
+    bgMusic.play().then(() => {
+      // If the user's first touch was NOT pulling the arrow, pause it so it's ready.
+      // If they ARE drawing the arrow, leave it playing.
+      if (!drawing && !played) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+      } else {
+        // Ensure UI matches playing state
+        const iconMuted = document.getElementById('icon-muted');
+        const iconUnmuted = document.getElementById('icon-unmuted');
+        if (iconMuted) iconMuted.style.display = 'none';
+        if (iconUnmuted) iconUnmuted.style.display = 'block';
+      }
+    }).catch(()=>{});
+  }
+  
+  if (bowSound) {
+    bowSound.muted = false;
+    bowSound.play().then(() => {
+      if (!drawing && !played) {
+        bowSound.pause();
+        bowSound.currentTime = 0;
+      }
+    }).catch(()=>{});
+  }
+  
+  document.removeEventListener('touchstart', unlockAudioContext);
+  document.removeEventListener('touchend', unlockAudioContext);
+  document.removeEventListener('click', unlockAudioContext);
+}
+document.addEventListener('touchstart', unlockAudioContext, { once: true, passive: true });
+document.addEventListener('touchend', unlockAudioContext, { once: true, passive: true });
+document.addEventListener('click', unlockAudioContext, { once: true, passive: true });
+
 archery.addEventListener('touchstart', (e) => {
   if (played) return;
   if (bgMusic) {
