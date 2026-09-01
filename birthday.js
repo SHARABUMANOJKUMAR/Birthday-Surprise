@@ -526,8 +526,9 @@ function startPolaroidAnimation() {
       // Coordinates are 0-100% of the .polaroids container
       let startLeft = rand(15, 85);
 
-      // Start clearly at/above the top of the tree container
-      let startTop = rand(-15, -5);
+      // On mobile view, start inside the head of the tree. Otherwise, slightly above.
+      const isMobile = window.innerWidth <= 768;
+      let startTop = isMobile ? rand(5, 15) : rand(-15, -5);
       
       // Fall vertically straight down to the bottom
       let endLeft = startLeft + rand(-1, 1); // strictly vertical fall
