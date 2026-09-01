@@ -1100,6 +1100,19 @@ function autoFire(){
   });
 }
 
+archery.addEventListener('touchstart', (e) => {
+  if (played) return;
+  if (bgMusic) {
+    bgMusic.muted = false;
+    if (bgMusic.paused) bgMusic.play().catch(()=>{});
+    const iconMuted = document.getElementById('icon-muted');
+    const iconUnmuted = document.getElementById('icon-unmuted');
+    if (iconMuted) iconMuted.style.display = 'none';
+    if (iconUnmuted) iconUnmuted.style.display = 'block';
+  }
+  if (bowSound) { bowSound.currentTime = 0; bowSound.play().catch(()=>{}); }
+}, { passive: true });
+
 archery.addEventListener('pointerdown', (e) => {
   if (played) return;
   if (bgMusic) {
