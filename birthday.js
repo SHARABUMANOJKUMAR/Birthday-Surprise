@@ -1282,26 +1282,50 @@ window.addEventListener('load', () => {
   if (bgm && muteBtn) {
     bgm.volume = 0.6;
     
-    // Attempt unmuted autoplay first
-    bgm.muted = false;
-    const playPromise = bgm.play();
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        // Autoplay unmuted succeeded
-        iconMuted.style.display = 'none';
-        iconUnmuted.style.display = 'block';
-      }).catch(e => {
-        // Autoplay blocked by browser policy, fallback to muted autoplay
-        console.log('Unmuted autoplay blocked, falling back to muted');
-        bgm.muted = true;
-        bgm.play().catch(err => console.log('Even muted autoplay blocked', err));
-        iconMuted.style.display = 'block';
-        iconUnmuted.style.display = 'none';
-      });
+    if (!isMobile) {
+      // Desktop/Laptop: Attempt unmuted autoplay first
+      bgm.muted = false;
+      const playPromise = bgm.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          // Autoplay unmuted succeeded
+          iconMuted.style.display = 'none';
+          iconUnmuted.style.display = 'block';
+        }).catch(e => {
+          // Autoplay blocked by browser policy, fallback to muted autoplay
+          console.log('Unmuted autoplay blocked, falling back to muted');
+          bgm.muted = true;
+          bgm.play().catch(err => console.log('Even muted autoplay blocked', err));
+          iconMuted.style.display = 'block';
+          iconUnmuted.style.display = 'none';
+        });
+      }
+    } else {
+      // Mobile view only: DO NOT start the song on load.
+      // Prepare it to play automatically when the arrow animation begins (pointerdown).
+      bgm.currentTime = 0;
+      // It remains silent until arrow interaction.
     }
     
     muteBtn.addEventListener('click', () => {
+      // On mobile, if they click the sound button before pulling the arrow, 
+      // we just toggle the UI but don't start playing the music prematurely.
+      if (isMobile && !played && !drawing && bgm.paused && bgm.currentTime === 0) {
+        if (iconMuted.style.display !== 'none') {
+          bgm.muted = false;
+          iconMuted.style.display = 'none';
+          iconUnmuted.style.display = 'block';
+        } else {
+          bgm.muted = true;
+          iconMuted.style.display = 'block';
+          iconUnmuted.style.display = 'none';
+        }
+        return;
+      }
+
       if (bgm.muted || bgm.paused) {
         bgm.muted = false;
         bgm.play().catch(e => console.log('Playback blocked', e));
