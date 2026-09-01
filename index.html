@@ -19,6 +19,20 @@
   <div id="loader" class="loader" aria-hidden="true">
     <div class="loader__spinner"></div>
   </div>
+  
+  <!-- Audio Control Button -->
+  <button id="muteBtn" class="mute-btn" aria-label="Toggle Audio">
+    <svg id="icon-muted" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <line x1="23" y1="9" x2="17" y2="15"></line>
+      <line x1="17" y1="9" x2="23" y2="15"></line>
+    </svg>
+    <svg id="icon-unmuted" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+    </svg>
+  </button>
+  
   <main class="scene">
 
     <!-- The tree world (Act 4). One canvas; it stays transparent until the
@@ -247,7 +261,7 @@
 
     <!-- Audio Elements -->
     <audio id="bgMusic" loop>
-      <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_517173de9f.mp3" type="audio/mpeg">
+      <source src="https://res.cloudinary.com/dwv8kc9vb/video/upload/v1788264704/ecb886a8-b973-4304-92ef-e63a8cfcd79a_vixfuj.mp3" type="audio/mpeg">
     </audio>
     <audio id="bowSound">
       <source src="https://cdn.pixabay.com/download/audio/2024/02/21/audio_19fcc6856f.mp3" type="audio/mpeg">

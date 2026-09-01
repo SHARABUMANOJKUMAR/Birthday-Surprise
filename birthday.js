@@ -605,6 +605,7 @@ function treeFrame(now){
   drawPetals(t, dt);
   drawRested();
   drawFloaters(t, dt, true);
+  drawFireworks(t, dt);
 
   showWish(t >= T.noteStart);
 
@@ -614,8 +615,169 @@ function treeFrame(now){
   treeRAF = requestAnimationFrame(treeFrame);
 }
 
+// === REALISTIC FIREWORKS SYSTEM ===
+const fwShells = [];
+const fwSparks = [];
+let lastFireworkT = 0;
+
+function drawFireworks(t, dt) {
+  // Launch new fireworks randomly
+  if (t > T.noteStart && t - lastFireworkT > rand(1.2, 3.5)) {
+    lastFireworkT = t;
+    
+    // Launch from the sides of the screen (beside the tree)
+    const isLeft = Math.random() > 0.5;
+    const startX = isLeft ? rand(W * 0.05, W * 0.35) : rand(W * 0.65, W * 0.95);
+    const targetY = rand(H * 0.1, H * 0.45); 
+    const hue = rand(0, 360);
+    
+    // Calculate initial velocity needed to reach targetY given gravity
+    const vy = -Math.sqrt(0.3 * (H - targetY)) * rand(0.9, 1.1); 
+    
+    // Curve slightly inward towards the center of the sky
+    const vx = isLeft ? rand(0.5, 2.5) : rand(-2.5, -0.5);
+    
+    fwShells.push({
+      x: startX,
+      y: H,
+      vx: vx,
+      vy: vy,
+      hue: hue,
+      brightness: rand(60, 90)
+    });
+  }
+
+  ctx.globalCompositeOperation = 'lighter'; // Realistic glowing blend mode
+
+  // 1. Update and draw ascending shells
+  for (let i = fwShells.length - 1; i >= 0; i--) {
+    let shell = fwShells[i];
+    
+    // Draw shell trail
+    ctx.beginPath();
+    ctx.moveTo(shell.x, shell.y);
+    
+    shell.x += shell.vx;
+    shell.vy += 0.15; // Gravity
+    shell.y += shell.vy;
+    
+    ctx.lineTo(shell.x, shell.y);
+    ctx.strokeStyle = `hsl(${shell.hue}, 100%, ${shell.brightness}%)`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Explode at apex
+    if (shell.vy >= -1) {
+      createExplosion(shell.x, shell.y, shell.hue);
+      fwShells.splice(i, 1);
+    }
+  }
+
+  // 2. Update and draw explosion sparks
+  for (let i = fwSparks.length - 1; i >= 0; i--) {
+    let spark = fwSparks[i];
+    
+    // Previous position for realistic motion blur line
+    const lastX = spark.x;
+    const lastY = spark.y;
+
+    spark.vx *= 0.92; // Stronger air friction for a sharper 'pop'
+    spark.vy *= 0.92; 
+    if (!spark.isFlash) spark.vy += 0.06; // Gravity (slightly floaty)
+    
+    spark.x += spark.vx;
+    spark.y += spark.vy;
+    spark.alpha -= spark.decay;
+
+    if (spark.alpha <= 0) {
+      fwSparks.splice(i, 1);
+    } else {
+      if (spark.isFlash) {
+        // Draw a massive colorful glow when it pops
+        const radGrad = ctx.createRadialGradient(spark.x, spark.y, 0, spark.x, spark.y, spark.size);
+        radGrad.addColorStop(0, `hsla(${spark.hue}, 100%, 80%, ${spark.alpha})`);
+        radGrad.addColorStop(1, `hsla(${spark.hue}, 100%, 50%, 0)`);
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(spark.x, spark.y, spark.size, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Realistic twinkling: occasionally flash bright white as they burn out
+        const isTwinkle = Math.random() < 0.1;
+        const flickerAlpha = isTwinkle ? spark.alpha : (Math.random() < 0.2 ? spark.alpha * 0.4 : spark.alpha);
+        const color = isTwinkle 
+          ? `rgba(255, 255, 255, ${spark.alpha})` 
+          : `hsla(${spark.hue}, 100%, ${spark.brightness}%, ${flickerAlpha})`;
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(spark.x, spark.y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = spark.size;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+    }
+  }
+  
+  ctx.globalCompositeOperation = 'source-over'; // Reset blend mode
+}
+
+function createExplosion(x, y, baseHue) {
+  const particleCount = rand(100, 180); // Even more massive burst
+  
+  // Add a huge, ultra-colorful glowing flash for the actual "pop"
+  fwSparks.push({
+    x: x,
+    y: y,
+    vx: 0,
+    vy: 0,
+    hue: rand(0, 360), // The flash itself is a random super-vibrant color
+    brightness: 100,
+    alpha: 1,
+    decay: 0.05, // Fades out very fast (20 frames)
+    size: rand(60, 100), // Huge radius for the glow
+    isFlash: true
+  });
+  
+  for (let i = 0; i < particleCount; i++) {
+    const angle = rand(0, Math.PI * 2);
+    // Exponential distribution for realistic dense core and sparse outer streaks
+    const speed = Math.pow(Math.random(), 2) * rand(4, 16); 
+    
+    // EVERY explosion is now a highly vibrant multi-color mix!
+    let hue = baseHue;
+    const colorChance = Math.random();
+    if (colorChance > 0.4) {
+      hue = rand(0, 360); // 60% chance for full rainbow confetti burst!
+    } else if (colorChance > 0.2) {
+      hue = baseHue + 180 + rand(-20, 20); // Complementary color
+    } else {
+      hue = baseHue + rand(-30, 30); // Analogous color mixing
+    }
+    
+    fwSparks.push({
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      hue: hue,
+      brightness: rand(70, 100),
+      alpha: 1,
+      decay: rand(0.015, 0.035),
+      size: rand(1.5, 3),
+      isFlash: false
+    });
+  }
+}
+
 function treeStart(){
   treeStartT = 0; treeLastT = 0; lastPetal = 0; replayArmed = false; window.bdayDone = false;
+  fwShells.length = 0; fwSparks.length = 0; lastFireworkT = 0;
+  
+  const muteBtn = document.getElementById('muteBtn');
+  if (muteBtn) muteBtn.classList.add('is-in');
+  
   cue('grow');
   buildScene();
   if (!treeRAF) treeRAF = requestAnimationFrame(treeFrame);
@@ -922,7 +1084,14 @@ function springBack(){
 
 function autoFire(){
   if (played) return;
-  if (bgMusic && bgMusic.paused) bgMusic.play().catch(()=>{});
+  if (bgMusic) {
+    bgMusic.muted = false;
+    if (bgMusic.paused) bgMusic.play().catch(()=>{});
+    const iconMuted = document.getElementById('icon-muted');
+    const iconUnmuted = document.getElementById('icon-unmuted');
+    if (iconMuted) iconMuted.style.display = 'none';
+    if (iconUnmuted) iconUnmuted.style.display = 'block';
+  }
   if (bowSound) { bowSound.currentTime = 0; bowSound.play().catch(()=>{}); }
   recT0 = performance.now(); cue('draw');       // t=0 of the soundtrack
   gsap.to({ d: curDraw }, {
@@ -934,7 +1103,14 @@ function autoFire(){
 
 archery.addEventListener('pointerdown', (e) => {
   if (played) return;
-  if (bgMusic && bgMusic.paused) bgMusic.play().catch(()=>{});
+  if (bgMusic) {
+    bgMusic.muted = false;
+    if (bgMusic.paused) bgMusic.play().catch(()=>{});
+    const iconMuted = document.getElementById('icon-muted');
+    const iconUnmuted = document.getElementById('icon-unmuted');
+    if (iconMuted) iconMuted.style.display = 'none';
+    if (iconUnmuted) iconUnmuted.style.display = 'block';
+  }
   if (bowSound) { bowSound.currentTime = 0; bowSound.play().catch(()=>{}); }
   drawing = true;
   try { archery.setPointerCapture(e.pointerId); } catch (_) {}
@@ -1096,5 +1272,47 @@ window.addEventListener('load', () => {
     setTimeout(() => {
       loader.style.display = 'none';
     }, 800);
+  }
+  
+  // Audio setup
+  const bgm = document.getElementById('bgMusic');
+  const muteBtn = document.getElementById('muteBtn');
+  const iconMuted = document.getElementById('icon-muted');
+  const iconUnmuted = document.getElementById('icon-unmuted');
+  
+  if (bgm && muteBtn) {
+    bgm.volume = 0.6;
+    
+    // Attempt unmuted autoplay first
+    bgm.muted = false;
+    const playPromise = bgm.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Autoplay unmuted succeeded
+        iconMuted.style.display = 'none';
+        iconUnmuted.style.display = 'block';
+      }).catch(e => {
+        // Autoplay blocked by browser policy, fallback to muted autoplay
+        console.log('Unmuted autoplay blocked, falling back to muted');
+        bgm.muted = true;
+        bgm.play().catch(err => console.log('Even muted autoplay blocked', err));
+        iconMuted.style.display = 'block';
+        iconUnmuted.style.display = 'none';
+      });
+    }
+    
+    muteBtn.addEventListener('click', () => {
+      if (bgm.muted || bgm.paused) {
+        bgm.muted = false;
+        bgm.play().catch(e => console.log('Playback blocked', e));
+        iconMuted.style.display = 'none';
+        iconUnmuted.style.display = 'block';
+      } else {
+        bgm.muted = true;
+        iconMuted.style.display = 'block';
+        iconUnmuted.style.display = 'none';
+      }
+    });
   }
 });

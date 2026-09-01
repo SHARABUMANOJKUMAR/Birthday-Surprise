@@ -78,6 +78,44 @@ body{
 }
 
 /* ============================================================
+   AUDIO CONTROL BUTTON
+   ============================================================ */
+.mute-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease, transform 0.3s ease, background 0.3s ease;
+}
+.mute-btn.is-in {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mute-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+.mute-btn svg {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+/* ============================================================
    ACT 1 — THE INVITATION
    ============================================================ */
 .hero{
