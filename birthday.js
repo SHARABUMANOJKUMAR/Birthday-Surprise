@@ -522,17 +522,15 @@ function startPolaroidAnimation() {
     const delay = index * 2.5; // exactly 2.5 seconds apart
     
     function dropPolaroid() {
-      // Tree canopy visually matches an ellipse/circle (border-radius: 50%)
       // Coordinates are 0-100% of the .polaroids container
       let startLeft = rand(15, 85);
 
-      // On mobile view, start inside the head of the tree. Otherwise, slightly above.
-      const isMobile = window.innerWidth <= 768;
-      let startTop = isMobile ? rand(5, 15) : rand(-15, -5);
+      // Start high up in the "sky" (off-screen top)
+      let startTop = rand(-100, -60);
       
-      // Fall vertically straight down to the bottom
+      // Fall vertically straight down to the bottom (past the bottom of the container)
       let endLeft = startLeft + rand(-1, 1); // strictly vertical fall
-      let endTop = rand(90, 105);
+      let endTop = rand(110, 130);
       
       const startRot = rand(-8, 8);
       const startScale = rand(0.7, 1.0); // Organic 3D depth
@@ -557,7 +555,7 @@ function startPolaroidAnimation() {
       const fallDistY = ((endTop - startTop) / 100) * h;
       const driftDistX = ((endLeft - startLeft) / 100) * w;
       
-      const duration = rand(10, 15); // Smooth cinematic drop
+      const duration = rand(15, 20); // Majestic slow fall from the sky
       
       // Infinite loop timeline
       const tl = gsap.timeline({ onComplete: dropPolaroid });
