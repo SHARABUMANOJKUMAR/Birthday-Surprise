@@ -67,7 +67,7 @@ const barBot  = $('barBot');
 const uline   = $('uline').querySelector('.uline__path');
 const bloom   = $('bloom');
 const replay  = $('replay');
-const polaroid = $('polaroid');
+const polaroids = $('polaroids');
 
 const bgMusic = $('bgMusic');
 const bowSound = $('bowSound');
@@ -278,6 +278,15 @@ function buildScene(){
   groundGrad.addColorStop(0, 'rgba(255,205,165,0.5)');
   groundGrad.addColorStop(1, 'rgba(255,205,165,0)');
 
+  // Sync polaroids container to tree canopy bounds
+  const pol = $('polaroids');
+  if (pol) {
+    pol.style.left = (cx - rx) + 'px';
+    pol.style.top = (cy - ry) + 'px';
+    pol.style.width = (rx * 2) + 'px';
+    pol.style.height = (ry * 2) + 'px';
+  }
+
   for (let i = 0; i < 11; i++){
     orbs.push({ x: rand(0, W), y: rand(0, H), r: rand(W * 0.05, W * 0.17), vy: rand(-6, -16), drift: rand(-0.3, 0.3), phase: rand(0, 6.28), alpha: rand(0.05, 0.13), sprite: pick(BOKEH) });
   }
@@ -487,7 +496,7 @@ function drawRested(){
   for (const r of rested) drawSprite(SPR.crisp[r.idx], r.x, r.y, r.box, r.rot, r.a);
 }
 
-function showWish(on){ wishEl.classList.toggle('is-in', on); if (polaroid) polaroid.classList.toggle('is-in', on); }
+function showWish(on){ wishEl.classList.toggle('is-in', on); if (polaroids) polaroids.classList.toggle('is-in', on); }
 
 /* the tree's own rAF: plays once from treeStart(), then holds, living */
 let treeStartT = 0, treeLastT = 0, treeRAF = 0, lastPetal = 0, replayArmed = false;
