@@ -66,7 +66,6 @@ const barTop  = $('barTop');
 const barBot  = $('barBot');
 const uline   = $('uline').querySelector('.uline__path');
 const bloom   = $('bloom');
-const replay  = $('replay');
 const polaroids = $('polaroids');
 
 const bgMusic = $('bgMusic');
@@ -270,16 +269,17 @@ function buildScene(){
   bgGrad.addColorStop(0.46, '#ffe7d6');
   bgGrad.addColorStop(0.78, '#fcd9c4');
   bgGrad.addColorStop(1, '#f3c4b5');
-  glowGrad = ctx.createRadialGradient(cx, cy, ry * 0.1, cx, cy, ry * 1.55);
-  glowGrad.addColorStop(0, 'rgba(255,219,170,0.6)');
-  glowGrad.addColorStop(0.5, 'rgba(255,170,150,0.2)');
-  glowGrad.addColorStop(1, 'rgba(255,170,150,0)');
+  glowGrad = ctx.createRadialGradient(cx, cy, ry * 0.1, cx, cy, ry * 1.8);
+  glowGrad.addColorStop(0, 'rgba(255,230,190,0.85)');
+  glowGrad.addColorStop(0.35, 'rgba(255,190,160,0.4)');
+  glowGrad.addColorStop(0.7, 'rgba(255,150,140,0.1)');
+  glowGrad.addColorStop(1, 'rgba(255,150,140,0)');
   groundGrad = ctx.createRadialGradient(cx, H * 1.02, ry * 0.2, cx, H * 1.02, ry * 1.6);
-  groundGrad.addColorStop(0, 'rgba(255,205,165,0.5)');
+  groundGrad.addColorStop(0, 'rgba(255,205,165,0.6)');
   groundGrad.addColorStop(1, 'rgba(255,205,165,0)');
 
   // Sync polaroids container to tree canopy bounds
-  const pol = $('polaroids');
+  const pol = document.getElementById('polaroids');
   if (pol) {
     pol.style.left = (cx - rx) + 'px';
     pol.style.top = (cy - ry) + 'px';
@@ -287,15 +287,22 @@ function buildScene(){
     pol.style.height = (ry * 2) + 'px';
   }
 
+  // Sync scene anchors to the tree trunk base
+  const anchors = document.getElementById('sceneAnchors');
+  if (anchors) {
+    anchors.style.left = cx + 'px';
+    anchors.style.top = groundY + 'px';
+  }
+
   for (let i = 0; i < 11; i++){
-    orbs.push({ x: rand(0, W), y: rand(0, H), r: rand(W * 0.05, W * 0.17), vy: rand(-6, -16), drift: rand(-0.3, 0.3), phase: rand(0, 6.28), alpha: rand(0.05, 0.13), sprite: pick(BOKEH) });
+    orbs.push({ x: cx + rand(-rx * 1.8, rx * 1.8), y: rand(0, H), r: rand(W * 0.05, W * 0.17), vy: rand(-6, -16), drift: rand(-0.3, 0.3), phase: rand(0, 6.28), alpha: rand(0.05, 0.13), sprite: pick(BOKEH) });
   }
 
   const FN = wide ? 18 : 15;
   for (let i = 0; i < FN; i++){
     const depth = Math.random();
     floaters.push({
-      x: rand(0, W), y: rand(-H * 0.1, H * 1.1), depth,
+      x: cx + rand(-rx * 1.8, rx * 1.8), y: rand(-H * 0.1, H * 1.1), depth,
       idx: (Math.random() * BLOSSOM.length) | 0,
       box: lerp(Math.min(W, H) * 0.025, Math.min(W, H) * 0.075, depth),
       vy: lerp(7, 20, depth), sway: rand(8, 22), phase: rand(0, 6.28),
@@ -402,7 +409,7 @@ function drawBokeh(t, dt){
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (const o of orbs){
     o.y += o.vy * dt; o.x += Math.sin(t * 0.3 + o.phase) * o.drift;
-    if (o.y < -o.r){ o.y = H + o.r; o.x = rand(0, W); }
+    if (o.y < -o.r){ o.y = H + o.r; o.x = cx + rand(-rx * 1.8, rx * 1.8); }
     ctx.globalAlpha = o.alpha;
     ctx.drawImage(o.sprite, o.x - o.r, o.y - o.r, o.r * 2, o.r * 2);
   }
@@ -417,7 +424,7 @@ function drawFloaters(t, dt, front){
     f.y -= f.vy * dt;
     f.x += Math.sin(t * 0.5 + f.phase) * f.sway * dt;
     f.rot += f.vrot * dt;
-    if (f.y < -f.box){ f.y = H + f.box; f.x = rand(0, W); }
+    if (f.y < -f.box){ f.y = H + f.box; f.x = cx + rand(-rx * 1.8, rx * 1.8); }
     drawSprite((f.soft ? SPR.soft : SPR.crisp)[f.idx], f.x, f.y, f.box, f.rot, f.baseA * appear);
   }
 }
@@ -496,7 +503,84 @@ function drawRested(){
   for (const r of rested) drawSprite(SPR.crisp[r.idx], r.x, r.y, r.box, r.rot, r.a);
 }
 
-function showWish(on){ wishEl.classList.toggle('is-in', on); if (polaroids) polaroids.classList.toggle('is-in', on); }
+let polaroidAnimStarted = false;
+function showWish(on) { 
+  wishEl.classList.toggle('is-in', on); 
+  if (polaroids && on && !polaroidAnimStarted) {
+    polaroidAnimStarted = true;
+    startPolaroidAnimation();
+  } 
+}
+
+function startPolaroidAnimation() {
+  const pElements = document.querySelectorAll('.polaroid');
+  if (!pElements.length) return;
+  
+  // Stagger the photos so they create a dense, continuous flow
+  pElements.forEach((el, index) => {
+    // Stagger the photos so they fall one by one in a distinct step-by-step sequence
+    const delay = index * 2.5; // exactly 2.5 seconds apart
+    
+    function dropPolaroid() {
+      // Tree canopy visually matches an ellipse/circle (border-radius: 50%)
+      // Coordinates are 0-100% of the .polaroids container
+      let startLeft = rand(15, 85);
+
+      // Start clearly at/above the top of the tree container
+      let startTop = rand(-15, -5);
+      
+      // Fall vertically straight down to the bottom
+      let endLeft = startLeft + rand(-1, 1); // strictly vertical fall
+      let endTop = rand(90, 105);
+      
+      const startRot = rand(-8, 8);
+      const startScale = rand(0.7, 1.0); // Organic 3D depth
+      const endRot = startRot + rand(-10, 10); // Small natural rotation
+
+      // Reset coordinates using CSS left/top for responsiveness
+      gsap.set(el, {
+        right: 'auto', // override CSS right: 0
+        left: startLeft + '%',
+        top: startTop + '%',
+        x: 0, y: 0,
+        rotation: startRot,
+        scale: startScale,
+        opacity: 0
+      });
+
+      // Calculate absolute pixel drift to use performant `transform` animation
+      const container = document.getElementById('polaroids');
+      const h = container.offsetHeight || window.innerHeight * 0.6;
+      const w = container.offsetWidth || window.innerWidth * 0.4;
+      
+      const fallDistY = ((endTop - startTop) / 100) * h;
+      const driftDistX = ((endLeft - startLeft) / 100) * w;
+      
+      const duration = rand(10, 15); // Smooth cinematic drop
+      
+      // Infinite loop timeline
+      const tl = gsap.timeline({ onComplete: dropPolaroid });
+      
+      // Master movement tween
+      tl.to(el, {
+        x: driftDistX,
+        y: fallDistY,
+        rotation: endRot,
+        duration: duration,
+        ease: 'none'
+      }, 0);
+      
+      // Fast fade in so it's visible right from the top
+      tl.to(el, { opacity: 1, duration: 1, ease: 'power1.out' }, 0);
+      
+      // Smooth fade out near the bottom
+      tl.to(el, { opacity: 0, duration: duration * 0.15, ease: 'power1.inOut' }, duration * 0.85);
+    }
+    
+    // Start after stagger delay
+    setTimeout(dropPolaroid, delay * 1000);
+  });
+}
 
 /* the tree's own rAF: plays once from treeStart(), then holds, living */
 let treeStartT = 0, treeLastT = 0, treeRAF = 0, lastPetal = 0, replayArmed = false;
@@ -525,7 +609,7 @@ function treeFrame(now){
   showWish(t >= T.noteStart);
 
   if (!window.bdayDone && t >= T.done) window.bdayDone = true;
-  if (!replayArmed && t >= T.done + 1.0){ replayArmed = true; armReplay(); }
+  if (!replayArmed && t >= T.done + 1.0){ replayArmed = true; }
 
   treeRAF = requestAnimationFrame(treeFrame);
 }
@@ -895,17 +979,13 @@ function enter(){
     .to(hint,     { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.7);
 }
 
-function armReplay(){
-  replay.hidden = false;
-  requestAnimationFrame(() => replay.classList.add('is-shown'));
-}
+
 
 /* back to Act 1, ready to be drawn again */
 function resetAll(){
   treeStop();
   showWish(false);
   window.bdayDone = false; replayArmed = false;
-  replay.classList.remove('is-shown'); replay.hidden = true;
   if (filmTL){ filmTL.pause(0); }
   gsap.set([flood, bloom], { autoAlpha: 0 });
   gsap.set(field, { autoAlpha: 0 });
@@ -951,7 +1031,6 @@ if (reduceMotion){
   buildMotes();
   document.fonts && document.fonts.ready.then(() => { refreshRig(); setDraw(0); });
   enter();
-  replay.addEventListener('click', resetAll);
 }
 
 /* ============================================================

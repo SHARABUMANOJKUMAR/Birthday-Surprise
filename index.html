@@ -207,27 +207,37 @@
       <p class="wish__sub" id="wSub">here&rsquo;s to a year that blooms</p>
     <!-- The Polaroid Memories -->
     <div class="polaroids" id="polaroids">
-      <div class="polaroid polaroid-1">
-        <img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788236520/THositha_cbd8kn.jpg" alt="A lovely memory" />
-        <p>A spark of joy...</p>
-      </div>
-      <div class="polaroid polaroid-2">
-        <img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244572/Thositha0_vooilq.jpg" alt="A beautiful moment" />
-        <p>A beautiful journey...</p>
-      </div>
-      <div class="polaroid polaroid-3">
-        <img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244981/Thosith0.l_pvz6pt.jpg" alt="A cherished memory" />
-        <p>A year that blooms...</p>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788236520/THositha_cbd8kn.jpg" alt="Memory" /><p>A spark of joy...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244572/Thositha0_vooilq.jpg" alt="Memory" /><p>A beautiful journey...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244981/Thosith0.l_pvz6pt.jpg" alt="Memory" /><p>A year that blooms...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788236520/THositha_cbd8kn.jpg" alt="Memory" /><p>Sweet moments...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244572/Thositha0_vooilq.jpg" alt="Memory" /><p>Unforgettable...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244981/Thosith0.l_pvz6pt.jpg" alt="Memory" /><p>Cherished...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788236520/THositha_cbd8kn.jpg" alt="Memory" /><p>Smile always...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244572/Thositha0_vooilq.jpg" alt="Memory" /><p>Magical days...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244981/Thosith0.l_pvz6pt.jpg" alt="Memory" /><p>With love...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788236520/THositha_cbd8kn.jpg" alt="Memory" /><p>Dream big...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244572/Thositha0_vooilq.jpg" alt="Memory" /><p>Forever young...</p></div>
+      <div class="polaroid"><img src="https://res.cloudinary.com/dwv8kc9vb/image/upload/v1788244981/Thosith0.l_pvz6pt.jpg" alt="Memory" /><p>Happy Birthday!</p></div>
+    </div>
+    <!-- Scene Anchors (Positioned dynamically by JS to align with the Canvas Tree) -->
+    <div id="sceneAnchors" class="scene-anchors">
+      <!-- The Magical Girl Character -->
+      <div class="character-container" id="characterContainer">
+        <!-- Floating Heart Balloon -->
+        <div class="balloon-container">
+          <div class="balloon-string"></div>
+          <svg class="balloon-heart" viewBox="0 0 100 92" aria-hidden="true">
+            <path d="M50 86.5C26 68 10.5 53.6 10.5 34.6 10.5 20.4 21 11 33.2 11c8.6 0 14.2 4.7 16.8 11.4C52.6 15.7 58.2 11 66.8 11 79 11 89.5 20.4 89.5 34.6 89.5 53.6 74 68 50 86.5Z" fill="url(#hg)" />
+            <path d="M50 86.5C26 68 10.5 53.6 10.5 34.6 10.5 20.4 21 11 33.2 11c8.6 0 14.2 4.7 16.8 11.4C52.6 15.7 58.2 11 66.8 11 79 11 89.5 20.4 89.5 34.6 89.5 53.6 74 68 50 86.5Z" fill="url(#hsheen)" opacity=".7" />
+            <ellipse cx="34" cy="30" rx="8.5" ry="5.4" fill="#fff" opacity=".72" style="mix-blend-mode:screen" />
+            <path d="M50 88 L 47 98 L 53 98 Z" fill="#9d0f3e" />
+          </svg>
+        </div>
+        <img src="girl.jpg" alt="A magical girl with a heart balloon" class="character-img" />
       </div>
     </div>
 
-    <!-- Play the film again once it has settled. -->
-    <button class="replay" id="replay" type="button" hidden>
-      <svg viewBox="0 0 24 24" aria-hidden="true" width="15" height="15">
-        <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor" />
-      </svg>
-      Again
-    </button>
 
     <!-- One lens over the whole film: vignette + fine grain. -->
     <div class="grade" aria-hidden="true">

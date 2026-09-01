@@ -491,76 +491,49 @@ body{
 .polaroids {
   position: absolute;
   /* top, left, width, height are set by JS in buildScene to match the tree canopy */
-  border-radius: 50%;
-  overflow: hidden; /* Constrain images strictly to the canopy shape */
   pointer-events: none;
   z-index: 10;
 }
 .polaroid {
   position: absolute;
-  top: 60%;
-  right: 5%; /* Anchor to the right side of the canopy container */
-  max-width: 120px; /* Scaled down to fit within tree */
+  top: 0;
+  right: 0;
+  max-width: 140px; /* Scaled down slightly to fit within tree */
   width: 25vw;
-  min-width: 150px;
-  background: #fff;
-  padding: 12px 12px 40px 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.1);
+  min-width: 120px;
+  background: #fafafa;
+  padding: 10px 10px 35px 10px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.05); /* Realistic depth */
   opacity: 0;
-  border-radius: 4px;
+  border-radius: 6px;
+  will-change: transform, opacity; /* 60FPS optimization */
+  pointer-events: auto; /* allow hover */
+  transition: box-shadow 0.4s ease, filter 0.4s ease;
+  filter: brightness(1);
+}
+.polaroid:hover {
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25), 0 10px 20px rgba(0,0,0,0.1);
+  filter: brightness(1.05);
 }
 @media (max-width: 768px) {
   .polaroid {
-    top: 65%;
-    right: 5%;
+    max-width: 110px;
+    min-width: 90px;
+    padding: 8px 8px 25px 8px;
   }
 }
 .polaroid img {
   width: 100%;
   height: auto;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 .polaroid p {
   font-family: 'Great Vibes', cursive;
-  font-size: 24px;
-  color: #333;
+  font-size: 22px;
+  color: #222;
   text-align: center;
-  margin: 15px 0 0 0;
+  margin: 10px 0 0 0;
   line-height: 1;
-}
-
-.polaroids.is-in .polaroid-1 {
-  animation: dropPolaroid1 15s ease-out forwards;
-  animation-delay: 2.5s;
-}
-.polaroids.is-in .polaroid-2 {
-  animation: dropPolaroid2 12s ease-out forwards;
-  animation-delay: 5.5s;
-}
-.polaroids.is-in .polaroid-3 {
-  animation: dropPolaroid3 9s ease-out forwards;
-  animation-delay: 8.5s;
-}
-
-@keyframes dropPolaroid1 {
-  0% { opacity: 0; transform: translate(10%, -150%) rotate(-15deg) scale(0.6); }
-  20% { opacity: 1; transform: translate(0%, -50%) rotate(5deg) scale(1); }
-  90% { opacity: 1; transform: translate(0%, -50%) rotate(5deg) scale(1); }
-  100% { opacity: 0; transform: translate(0%, 20%) rotate(5deg) scale(1); }
-}
-
-@keyframes dropPolaroid2 {
-  0% { opacity: 0; transform: translate(0%, -160%) rotate(20deg) scale(0.6); }
-  22% { opacity: 1; transform: translate(10%, -60%) rotate(-5deg) scale(1.05); }
-  90% { opacity: 1; transform: translate(10%, -60%) rotate(-5deg) scale(1.05); }
-  100% { opacity: 0; transform: translate(10%, 10%) rotate(-5deg) scale(1.05); }
-}
-
-@keyframes dropPolaroid3 {
-  0% { opacity: 0; transform: translate(20%, -140%) rotate(-10deg) scale(0.6); }
-  25% { opacity: 1; transform: translate(-10%, -40%) rotate(10deg) scale(0.95); }
-  90% { opacity: 1; transform: translate(-10%, -40%) rotate(10deg) scale(0.95); }
-  100% { opacity: 0; transform: translate(-10%, 30%) rotate(10deg) scale(0.95); }
 }
 
 /* Dynamic Name Style */
@@ -591,4 +564,95 @@ body{
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* ============================================================
+   GIRL CHARACTER & BALLOON (Anchored dynamically to Tree)
+   ============================================================ */
+.scene-anchors {
+  position: absolute;
+  /* left and top set by JS to tree trunk base (cx, groundY) */
+  z-index: 15; /* Above tree */
+  pointer-events: none;
+}
+
+.character-container {
+  position: absolute;
+  bottom: 0;
+  left: 3vw; /* Offset slightly right of the trunk */
+  width: 25vw;
+  max-width: 200px;
+  min-width: 130px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.5s ease 2s, transform 1.5s ease 2s; /* Fade in with .wish */
+}
+
+/* Triggered when .wish gets .is-in */
+.wish.is-in ~ .scene-anchors .character-container,
+.scene-anchors.is-in .character-container {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.character-img {
+  width: 100%;
+  height: auto;
+  /* Multiply completely erases the solid white background and merges her with the warm tree background */
+  mix-blend-mode: multiply; 
+  animation: breatheCharacter 4s ease-in-out infinite alternate;
+  /* Slight contrast boost to maintain premium feel after blend mode */
+  filter: contrast(1.1) brightness(1.05); 
+}
+
+@keyframes breatheCharacter {
+  0% { transform: translateY(0) scale(1) rotate(0deg); }
+  100% { transform: translateY(-4px) scale(1.01) rotate(0.5deg); } 
+}
+
+.balloon-container {
+  position: absolute;
+  top: -80px;
+  right: -20px;
+  width: 50px;
+  height: 120px;
+  animation: floatBalloon 3s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+}
+
+.balloon-string {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  height: 80px;
+  background: rgba(100, 50, 50, 0.4);
+  transform-origin: bottom;
+  animation: swayString 3s ease-in-out infinite alternate;
+}
+
+.balloon-heart {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+}
+
+@keyframes floatBalloon {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes swayString {
+  0% { transform: rotate(-2deg); }
+  100% { transform: rotate(2deg); }
+}
+
+@media (max-width: 768px) {
+  .character-container {
+    left: 8vw;
+    max-width: 150px;
+  }
 }
